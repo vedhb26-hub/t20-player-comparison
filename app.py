@@ -6,6 +6,7 @@ import streamlit as st
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PHASES = ["powerplay", "middle", "death"]
+PHASE_LABELS = {"powerplay": "1 Powerplay", "middle": "2 Middle", "death": "3 Death"}
 
 st.set_page_config(page_title="T20 Player Comparison", layout="wide")
 
@@ -102,21 +103,21 @@ def phase_frame(df, fn, col):
     for pid in (a, b):
         g = df[df["pid"] == pid]
         out[shown[pid]] = [fn(g[g["phase"] == p])[col] for p in PHASES]
-    return pd.DataFrame(out, index=PHASES)
+    return pd.DataFrame(out, index=[PHASE_LABELS[p] for p in PHASES])
 
 
 if view == "Batting":
     table = pd.DataFrame({shown[a]: bat_stats(d[d["pid"] == a]), shown[b]: bat_stats(d[d["pid"] == b])})
     st.dataframe(table.astype(object))
     st.subheader("Strike rate by phase")
-    st.bar_chart(phase_frame(d, bat_stats, "Strike rate"))
+    st.bar_chart(phase_frame(d, bat_stats, "Strike rate"), stack=False)
     st.subheader("Dot ball % by phase")
-    st.bar_chart(phase_frame(d, bat_stats, "Dot %"))
+    st.bar_chart(phase_frame(d, bat_stats, "Dot %"), stack=False)
 else:
     table = pd.DataFrame({shown[a]: bowl_stats(d[d["pid"] == a]), shown[b]: bowl_stats(d[d["pid"] == b])})
     st.dataframe(table.astype(object))
     st.subheader("Economy by phase")
-    st.bar_chart(phase_frame(d, bowl_stats, "Economy"))
+    st.bar_chart(phase_frame(d, bowl_stats, "Economy"), stack=False)
 
 st.caption("Data: Cricsheet (cricsheet.org), ball-by-ball T20 internationals and leagues. "
            "Matches involving Afghanistan and some older matches are not included, so totals can be lower than official figures.")
